@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js'></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <title></title>
+</head>
+<body>
+
+    <div class="container">
+          <form>
+            <div class="input-group">
+                <p>card number: <input class="form-control" data-bind="textInput: cardNumber" /></p>
+                <p>cvc:         <input class="form-control" data-bind="textInput: cvc" /></p>
+                <p>year:        <input class="form-control" data-bind="textInput: year" /></p>
+                <p>month:       <input class="form-control" data-bind="textInput: month" /></p>
+                <p>amount:      <input class="form-control" data-bind="textInput: (amount)" />GBP</p>
+            </div>
+        </form>
+        <br />
+        <button type="button" data-bind="click: btn1a, enable:btn1Disable" class="btn btn-primary">Pay</button>
+        <br />
+        <p>source id that will be saved for the customer to generate 3dsecure sources, this one is reusable <input class="form-control" data-bind="textInput: reusableSource" /></p>
+        <div class="span6">
+            <p>card 3d secure informations: <span data-bind="text: status" /></p>
+            <p>status      <span data-bind="text: response" /></p>
+        </div>
+        <button type="button" data-bind="click: btn2a, enable:btn2Disable" class="btn btn-primary">3dSecure -> button to create 3dsecure object</button>
+        <br /><br /><br /><br />
+        <button type="button" data-bind="click: btn3a, enable:btn3Disable" class="btn btn-primary">Verify - open the bank account page</button>
+        <br /><h1>STATUS:<span data-bind="text: statusText" /></h1>
+        <br /><h5>pending - waiting for verification </h5>
+        <h5>chargeable - can be charged</h5>
+        <h5>failed - failed</h5>
+        <h5>consumed - consumed - charged</h5>
+
+    </div>
+    <script>
+        var data = [];
+        var viewModel = {
+
+            cardNumber: ko.observable("4000 0000 0000 3063"),
+            cvc: ko.observable("123"),
+            year: ko.observable("2020"),
+            month: ko.observable("12"),
+            amount: ko.observable(1),
+
+            reusableSource: ko.observable(""),
+            status: ko.observable(""),
+            response: ko.observable(""),
+
+            url: ko.observable(""),
+            clientSecret: ko.observable(""),
+            source: ko.observable(""),
+
+            btn1Disable: ko.observable(true),
+            btn2Disable: ko.observable(false),
+            btn3Disable: ko.observable(false),
+            btn4Disable: ko.observable(false),
+
+            statusText: ko.observable(""),
+
+
+
+            ///////////////REUSABLE////////////////
+            btn1a: function (data, event) {
+                this.btn1Disable(false);
+
+                var stripeResponseHandler = function (status, response) {
+                    var source = response.id;
+                    viewModel.reusableSource(source);
+                    //source from here should be sent to backend TO SAVE IT FOR LATER USE! :)
+                    //its job is to let you create 3d secure src token that is single time use
+                    viewModel.status(response.card.three_d_secure);
+                    viewModel.response(response.status);
+                    viewModel.btn2Disable(true);
+                }
+
+                //create reusable source token for card!
+                console.log(this.cardNumber());
+                Stripe.source.create({
+                    type: 'card',
+                    card: {
+                        number: this.cardNumber(),
+                        cvc: this.cvc(),
+                        exp_month: this.month(),
+                        exp_year: this.year(),
+                    },
+                    metadata: {'magic123': 'cardMagic'}
+                }, stripeResponseHandler);
+            },
+
+            /////////////AFTER VERIFICATION///////////
+            btn2a: function (data, event) {
+                this.btn2Disable(false);
+
+                var stripe3DSecureResponseHandler = function (status, response) {
+                    console.log(response);
+                    viewModel.url(response.redirect.url);
+                    viewModel.source(response.id);
+                    viewModel.clientSecret(response.client_secret);
+                    viewModel.btn3Disable(true);
+                }
+
+                Stripe.source.create({
+                    type: 'three_d_secure',
+                    amount: this.amount() * 100,
+                    currency: "gbp",
+                    three_d_secure: {
+                        card: this.reusableSource()
+                    },
+                    redirect: {
+                        return_url: "http://google.pl"
+                    },
+                    metadata: {'magic123': 'paymentmagic'}
+                }, stripe3DSecureResponseHandler);
+            },
+
+            btn3a: function (data, event) {
+                Stripe.source.poll(
+                    this.source(),
+                    this.clientSecret(),
+                    function (status, source) {
+                        console.log(status);
+                        viewModel.statusText(source.status)
+                        //source from here should be sent to backend! :) to make a charge
+                        var data = ko.toJSON({ token: source.id });
+                        if (source.status == "chargeable") {
+                            //$.ajax({
+                            //    url: "api/stripe/source/charge",
+                            //    type: "POST",
+                            //    data: data,
+                            //    processData: false,
+                            //    contentType: "application/json",
+                            //    dataType: "json",
+                            //    success: function (returnedData) {
+                            //        console.log(returnedData);
+                            //        Stripe.source.cancelPoll(viewModel.source());
+                            //    }
+                            //});
+                            console.log(source.id);
+
+                        }
+                    });
+                window.open(this.url());
+            },
+
+            btn4a: function (data, event) {
+
+            }
+        };
+
+        ko.applyBindings(viewModel);
+    </script>
+
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script>
+        Stripe.setPublishableKey('pk_test_9UPFEK80bhGzUfTMvFzliNi7');
+    </script>
+</body>
+</html>
