@@ -1,7 +1,8 @@
 Pre:
 
-Konto na stripe ze zweryfikowanym numerem telefonu :( 
-    https://dashboard.stripe.com/account klikamy verify - stripe nie zapisuje tego numeru więc ci co kochają swoje dane osobowe nie muszą płakać. 
+Konto na stripe ze zweryfikowanym numerem telefonu :
+
+ https://dashboard.stripe.com/account klikamy verify - stripe nie zapisuje tego numeru więc ci co kochają swoje dane osobowe nie muszą płakać. 
 
 
 bash/gitbash
@@ -16,19 +17,25 @@ bash/gitbash
     Windows
         Z użyciem chocolatey
         https://chocolatey.org
-        choco install jq
+        `choco install jq`
 
-- ngrok to https://ngrok.com/
+- ngrok  https://ngrok.com/
     MacOS
-        brew install ngrok
+        `brew install ngrok`
     Windows
-        choco install ngrok
-    oraz konto do niego i odpalenie
+     `choco install ngrok` lub 
+
+     `npm install -g ngrok`
+
+    wraz z kontem i wykonaniem 
+
+    `ngrok authtoken some_token`
+
     https://dashboard.ngrok.com/get-started
 
 
 - node.js 
     MacOS
-        brew install node
+        `brew install node`
     Windows
-        choco install node
+        `choco install node`
