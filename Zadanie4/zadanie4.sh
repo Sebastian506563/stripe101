@@ -1,4 +1,4 @@
-PRIVATE_KEY=sk_test_O27a7bcKqDZTPbjn4MuSJUvq
+PRIVATE_KEY=#1. private key
 
 PLAN_NAME=PREMIUM
 PRODUCT_NAME=PREMIUM_SUB
@@ -12,13 +12,7 @@ Echo $PRODUCT
 
 PROD_ID=$(Echo "$PRODUCT" | jq -r '.id' )
 
-PLAN=$(curl https://api.stripe.com/v1/plans \
-   -u $PRIVATE_KEY: \
-   -d amount=5000 \
-   -d interval=month \
-   -d product[name]="$PRODUCT_NAME" \
-   -d currency=usd \
-   -d id=$PLAN_NAME)
+PLAN=#2. create a plan
 
 PLAN_ID=$(Echo "$PLAN" | jq -r '.id' )
 
@@ -51,12 +45,7 @@ curl https://api.stripe.com/v1/customers/$CUSTOMER_ID \
 
 Echo "Customer created"
 
-#Subscribe
-curl https://api.stripe.com/v1/subscriptions \
-   -u $PRIVATE_KEY: \
-   -d items[0][plan]=$PLAN_NAME\
-   -d customer=$CUSTOMER_ID \
-   -d trial_period_days=14
+#3. Subscribe user/custoemr to plan with trial
 
 
 read -r -p "Enter to delete: " -n 1

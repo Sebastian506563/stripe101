@@ -1,4 +1,4 @@
-PRIVATE_KEY=sk_test_O27a7bcKqDZTPbjn4MuSJUvq
+PRIVATE_KEY=#1 private key
 
 
 CUSTOMER=$(curl https://api.stripe.com/v1/customers \
@@ -28,25 +28,11 @@ curl https://api.stripe.com/v1/customers/$CUSTOMER_ID \
 
 Echo "Customer created"
 
-PRODUCT=$(curl https://api.stripe.com/v1/products \
-   -u $PRIVATE_KEY: \
-   -d name=T-shirt \
-   -d type=good \
-   -d description="Comfortable cotton t-shirt" \
-   -d attributes[]=size \
-   -d attributes[]=gender)
+PRODUCT=#2. create a product
 
 PROD_ID=$(Echo "$PRODUCT" | jq -r '.id' )
 
-SKU=$(curl https://api.stripe.com/v1/skus \
-   -u $PRIVATE_KEY: \
-   -d attributes[size]=Medium \
-   -d attributes[gender]=Unisex \
-   -d price=1500 \
-   -d currency=usd \
-   -d inventory[type]=finite \
-   -d inventory[quantity]=500 \
-   -d product=$PROD_ID)
+SKU=#3. create sku for product
 
 Echo "SKU and product created"
 
@@ -54,29 +40,18 @@ SKUs=$(curl https://api.stripe.com/v1/skus?limit=3 \
     -u $PRIVATE_KEY: \
     -G )
 
+#gets first SKU ID
 SKU_ID=$(Echo "$SKUs" | jq -r '.data[0].id' )
 
 #USER BEGINS HIS PATH HERE :)
 
-ORDER=$(curl https://api.stripe.com/v1/orders \
-   -u $PRIVATE_KEY: \
-   -d items[][type]=sku \
-   -d items[][parent]=$SKU_ID \
-   -d currency=usd \
-   -d shipping[name]="Emma Moore" \
-   -d shipping[address][line1]="1234 Main Street" \
-   -d shipping[address][city]="San Francisco" \
-   -d shipping[address][state]=CA \
-   -d shipping[address][country]=US \
-   -d shipping[address][postal_code]=94111 \
-   -d email="emma.moore@example.com" \
-   -d customer=$CUSTOMER_ID)
+ORDER=#4. Create an order with created SKU and producy
 
 Echo "Order Created"
 
 
 ORDER_ID=$(Echo "$ORDER" | jq -r '.id' )
 
-curl https://api.stripe.com/v1/orders/$ORDER_ID/pay \
-   -u $PRIVATE_KEY: \
-   -d customer=$CUSTOMER_ID
+#5. pay for order
+
+#6. Create a coupon and use it :)

@@ -1,16 +1,14 @@
-PRIVATE_KEY=sk_test_O27a7bcKqDZTPbjn4MuSJUvq
+PRIVATE_KEY=#1. Enter your private key
 
-CUSTOMER=$(curl https://api.stripe.com/v1/customers \
-   -u $PRIVATE_KEY: \
-   -d description="Magic customer" \
-   -d "metadata[my_database_id]=my_database_id")
+CUSTOMER=#2. Create a customer
+
 
 #show id 
 CUSTOMER_ID=$(Echo "$CUSTOMER" | jq -r '.id' )
 
 #create card - normally it should be done by frontend/elements.js
 TOKEN=$(curl https://api.stripe.com/v1/tokens \
-   -u sk_test_O27a7bcKqDZTPbjn4MuSJUvq: \
+   -u $PRIVATE_KEY: \
    -d card[number]=4242424242424242 \
    -d card[exp_month]=12 \
    -d card[exp_year]=2019 \
@@ -20,10 +18,7 @@ TOKEN=$(curl https://api.stripe.com/v1/tokens \
 CARD_ID=$(Echo "$TOKEN" | jq -r '.card.id' )
 TOKEN_ID=$(Echo "$TOKEN" | jq -r '.id' )
 
-#attach card to customer 2nd way
-curl https://api.stripe.com/v1/customers/$CUSTOMER_ID \
-   -u $PRIVATE_KEY: \
-   -d source=$TOKEN_ID
+#3. Attach a card to customer 2st way - use customer object
 
 read -r -p "Press any key to continue" -n 1
 
@@ -32,5 +27,5 @@ curl https://api.stripe.com/v1/charges \
    -u $PRIVATE_KEY: \
    -d amount=1000 \
    -d currency=usd \
-   -d customer=$CUSTOMER_ID \
-   -d source=$CARD_ID
+   -d customer=#4. put customer id -slash on the left of this text line must stay \
+   -d source=#5. put card id

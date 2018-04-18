@@ -1,4 +1,4 @@
-PRIVATE_KEY=sk_test_O27a7bcKqDZTPbjn4MuSJUvq
+PRIVATE_KEY=#1. private key#
 
 CUSTOMER=$(curl https://api.stripe.com/v1/customers \
    -u $PRIVATE_KEY: \
@@ -23,14 +23,8 @@ TOKEN_ID=$(Echo "$TOKEN" | jq -r '.id' )
 
 read -p "Give me a source token created via frontend(3dSecureTestFlow.html in first field): " CARD_SRC
 
-#create card source
-SRC=$(curl https://api.stripe.com/v1/sources \
-   -u $PRIVATE_KEY: \
-   -d amount=100 \
-   -d currency=gbp \
-   -d type=three_d_secure \
-   -d redirect[return_url]="http://www.funcage.com/?" \
-   -d three_d_secure[card]=$CARD_SRC)
+
+SRC=#2, Create payment source - remember about currency :)
 
    
 SRC_ID=$(Echo "$SRC" | jq -r '.id' )
@@ -43,9 +37,4 @@ curl https://api.stripe.com/v1/customers/$CUSTOMER_ID/sources \
 
 read -r -p "Go to: $THREE_DS_URL and confirm your payment and wait few seconds :)..." -n 1
 
-curl https://api.stripe.com/v1/charges \
-   -u $PRIVATE_KEY: \
-   -d amount=100 \
-   -d currency=gbp \
-   -d customer=$CUSTOMER_ID \
-   -d source=$SRC_ID
+#3. Create a charge with capture - false and true and check dashboard
