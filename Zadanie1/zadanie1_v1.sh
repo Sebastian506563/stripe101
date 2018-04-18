@@ -10,7 +10,7 @@ CUSTOMER_ID=$(Echo "$CUSTOMER" | jq -r '.id' )
 
 #create card - normally it should be done by frontend/elements.js
 TOKEN=$(curl https://api.stripe.com/v1/tokens \
-   -u sk_test_O27a7bcKqDZTPbjn4MuSJUvq: \
+   -u $PRIVATE_KEY: \
    -d card[number]=4242424242424242 \
    -d card[exp_month]=12 \
    -d card[exp_year]=2019 \

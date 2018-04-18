@@ -25,9 +25,9 @@ read -p "Give me a source token created via frontend(3dSecureTestFlow.html in fi
 
 #create card source
 SRC=$(curl https://api.stripe.com/v1/sources \
-   -u sk_test_O27a7bcKqDZTPbjn4MuSJUvq: \
-   -d amount=1099 \
-   -d currency=usd \
+   -u $PRIVATE_KEY: \
+   -d amount=100 \
+   -d currency=gbp \
    -d type=three_d_secure \
    -d redirect[return_url]="http://www.funcage.com/?" \
    -d three_d_secure[card]=$CARD_SRC)
@@ -45,7 +45,7 @@ read -r -p "Go to: $THREE_DS_URL and confirm your payment and wait few seconds :
 
 curl https://api.stripe.com/v1/charges \
    -u $PRIVATE_KEY: \
-   -d amount=1099 \
-   -d currency=usd \
+   -d amount=100 \
+   -d currency=gbp \
    -d customer=$CUSTOMER_ID \
    -d source=$SRC_ID
